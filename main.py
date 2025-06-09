@@ -35,9 +35,13 @@ running = True
 
 # Fonction pour exécuter le générateur de best-of
 def run_bestof_generator():
-    print(f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Démarrage de la génération du best-of hebdomadaire...")
+    print(
+        f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Démarrage de la génération du best-of hebdomadaire..."
+    )
     asyncio.run(generate_weekly_bestof())
-    print(f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Génération du best-of terminée.")
+    print(
+        f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Génération du best-of terminée."
+    )
 
 
 # Fonction pour exécuter le planificateur dans un thread séparé
@@ -59,10 +63,25 @@ async def main():
     global running
 
     # Analyser les arguments de ligne de commande
-    parser = argparse.ArgumentParser(description='BestOfMaker - Génère des best-of de clips Twitch')
-    parser.add_argument('--bestof', action='store_true', help='Générer immédiatement un best-of puis quitter')
-    parser.add_argument('--clips', type=int, default=20, help='Nombre de clips à inclure dans le best-of (défaut: 20)')
-    parser.add_argument('--monitor', action='store_true', help='Lancer uniquement la surveillance des streamers')
+    parser = argparse.ArgumentParser(
+        description="BestOfMaker - Génère des best-of de clips Twitch"
+    )
+    parser.add_argument(
+        "--bestof",
+        action="store_true",
+        help="Générer immédiatement un best-of puis quitter",
+    )
+    parser.add_argument(
+        "--clips",
+        type=int,
+        default=20,
+        help="Nombre de clips à inclure dans le best-of (défaut: 20)",
+    )
+    parser.add_argument(
+        "--monitor",
+        action="store_true",
+        help="Lancer uniquement la surveillance des streamers",
+    )
     args = parser.parse_args()
 
     # Mode génération immédiate de best-of
@@ -76,7 +95,9 @@ async def main():
     if args.monitor:
         print(f"=== BestOfMaker - Mode surveillance uniquement ===")
         print(f"Surveillance des streamers pour les termes: {', '.join(SEARCH_TERMS)}")
-        await monitor_streamers(GAME_ID, SEARCH_TERMS, interval_minutes=CHECK_INTERVAL_MINUTES)
+        await monitor_streamers(
+            GAME_ID, SEARCH_TERMS, interval_minutes=CHECK_INTERVAL_MINUTES
+        )
         return
 
     # Mode normal (surveillance + génération planifiée)

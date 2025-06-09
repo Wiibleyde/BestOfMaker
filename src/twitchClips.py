@@ -30,13 +30,16 @@ async def login() -> Twitch:
     client_id = os.getenv("TWITCH_CLIENT_ID")
     client_secret = os.getenv("TWITCH_CLIENT_SECRET")
     if not client_id or not client_secret:
-        raise ValueError("TWITCH_CLIENT_ID et TWITCH_CLIENT_SECRET doivent être définis dans le fichier .env")
+        raise ValueError(
+            "TWITCH_CLIENT_ID et TWITCH_CLIENT_SECRET doivent être définis dans le fichier .env"
+        )
     twitch = Twitch(client_id, client_secret)
     await twitch.authenticate_app([])
     return twitch
 
 
 from typing import Optional
+
 
 async def get_clips_with_term(
     twitch: Twitch,
@@ -112,16 +115,9 @@ async def get_clips_with_term(
                 if not hasattr(clip, "game_id") or str(clip.game_id) != str(game_id):
                     continue  # Ignore les clips qui ne sont pas du jeu demandé
 
-            # Si broadcaster_name absent, le récupérer via l'API
-            print(
-                getattr(clip, "broadcaster_name")
-            )
             if not hasattr(clip, "broadcaster_name") or not clip.broadcaster_name:
                 try:
                     user = await first(twitch.get_users(user_ids=[clip.broadcaster_id]))
-                    print(
-                        f"AAAAAAAAAAAAAAAAAAAAAA Récupération du nom du broadcaster pour l'ID {clip.broadcaster_id}..."
-                    )
                     if user and hasattr(user, "display_name"):
                         clip.broadcaster_name = user.display_name
                     elif user and hasattr(user, "login"):
@@ -129,7 +125,9 @@ async def get_clips_with_term(
                     else:
                         clip.broadcaster_name = clip.broadcaster_id
                 except Exception as e:
-                    print(f"Erreur lors de la récupération du nom du broadcaster pour l'ID {clip.broadcaster_id}: {e}")
+                    print(
+                        f"Erreur lors de la récupération du nom du broadcaster pour l'ID {clip.broadcaster_id}: {e}"
+                    )
                     clip.broadcaster_name = clip.broadcaster_id
 
             clips.append(clip)
@@ -408,7 +406,9 @@ def download_clip(url_clip: str, destination_file: str) -> bool:
         return False
 
 
-async def prepare_clip_infos(clips: list[Clip], download_dir: str) -> list[tuple[str, str]]:
+async def prepare_clip_infos(
+    clips: list[Clip], download_dir: str
+) -> list[tuple[str, str]]:
     """
     Prépare une liste de tuples (chemin_du_clip, broadcaster_name) pour l'assemblage vidéo.
     Télécharge les clips si besoin.

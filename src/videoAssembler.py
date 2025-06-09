@@ -5,15 +5,6 @@ INTRO_PATH = "assets/videos/INTRO.mp4"
 OUTRO_PATH = "assets/videos/OUTRO.mp4"
 TRANSI_PATH = "assets/videos/TRANSI.mp4"
 
-def _get_existing_clips(paths):
-    """Retourne la liste des chemins de clips existants, affiche un avertissement sinon."""
-    existing = []
-    for path in paths:
-        if os.path.exists(path):
-            existing.append(path)
-        else:
-            print(f"Avertissement: Le clip {path} n'existe pas et sera ignoré.")
-    return existing
 
 def concatClips(clip_infos: list[tuple[str, str]], output_path: str) -> str:
     """
@@ -31,11 +22,13 @@ def concatClips(clip_infos: list[tuple[str, str]], output_path: str) -> str:
     all_infos.extend(clip_infos)
     if os.path.exists(OUTRO_PATH):
         all_infos.append((OUTRO_PATH, None))
-    
+
     TRANSI_VIDEO = ""
     if os.path.exists(TRANSI_PATH):
         # Ajouter la transition si elle existe
-        TRANSI_VIDEO = VideoFileClip(TRANSI_PATH).resized(width=1920, height=1080).with_fps(60)
+        TRANSI_VIDEO = (
+            VideoFileClip(TRANSI_PATH).resized(width=1920, height=1080).with_fps(60)
+        )
 
     # Filtrer les chemins existants et avertir pour les manquants
     valid_infos = []
@@ -46,8 +39,10 @@ def concatClips(clip_infos: list[tuple[str, str]], output_path: str) -> str:
                 valid_infos.append((path, None))
             else:
                 if not name:
-                    print(f"Avertissement: broadcaster_name manquant pour {path}, valeur par défaut utilisée.")
-                    name = "LeStreamerLuiLà"
+                    print(
+                        f"Avertissement: broadcaster_name manquant pour {path}, valeur par défaut utilisée."
+                    )
+                    name = "StreamerInconnu"
                 print(f"Ajout du clip: {path} pour le streamer: {name}")
                 valid_infos.append((path, name))
         else:
@@ -88,25 +83,32 @@ def concatClips(clip_infos: list[tuple[str, str]], output_path: str) -> str:
         streamer_tag = f"@{broadcaster_name}"
 
         # Créer le clip de texte
-        txt_clip = TextClip(
-            text=streamer_tag,
-            font_size=36,
-            color='white',
-            font='assets/font/Montserrat-VariableFont_wght.ttf',
-            bg_color='#00000080',  # Semi-transparent black background
-            stroke_color='black',
-            stroke_width=2,
-            size=(600, 60),
-            method='caption'
-        ).with_duration(clip.duration).with_position(("right", "bottom"))
+        txt_clip = (
+            TextClip(
+                text=streamer_tag,
+                font_size=36,
+                color="white",
+                font="assets/font/Montserrat-VariableFont_wght.ttf",
+                bg_color="#00000080",
+                stroke_color="black",
+                stroke_width=2,
+                size=(600, 60),
+                method="caption",
+            )
+            .with_duration(clip.duration)
+            .with_position(("right", "bottom"))
+        )
 
         # Superposer le texte sur le clip vidéo
         composite = CompositeVideoClip([clip, txt_clip])
         processed_clips.append(composite)
 
     try:
-        # Utilise compose pour garantir la cohérence de la taille et du framerate
-        final_clip = concatenate_videoclips(processed_clips, method="chain", transition=TRANSI_VIDEO if TRANSI_VIDEO else None)
+        final_clip = concatenate_videoclips(
+            processed_clips,
+            method="chain",
+            transition=TRANSI_VIDEO if TRANSI_VIDEO else None,
+        )
         final_clip.write_videofile(
             output_path,
             codec="libx264",
@@ -115,7 +117,7 @@ def concatClips(clip_infos: list[tuple[str, str]], output_path: str) -> str:
             remove_temp=True,
             threads=4,
             preset="veryfast",
-            fps=60
+            fps=60,
         )
         print(f"Vidéo concaténée avec succès: {output_path}")
         size_mb = os.path.getsize(output_path) / (1024 * 1024)
@@ -127,4 +129,3 @@ def concatClips(clip_infos: list[tuple[str, str]], output_path: str) -> str:
     finally:
         for clip in video_clips:
             clip.close()
-

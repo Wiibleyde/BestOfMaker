@@ -198,7 +198,7 @@ def save_bestof_metadata(clips: list[Clip], file_path: str, date_str: str):
             "views": clip.view_count,
             "created_at": created_at,
             "url": clip.url,
-            "timecode": format_timecode(timecode)  # timecode au format mm:ss
+            "timecode": format_timecode(timecode),  # timecode au format mm:ss
         }
 
     # Récupérer la durée de l'intro si elle existe
@@ -223,8 +223,7 @@ def save_bestof_metadata(clips: list[Clip], file_path: str, date_str: str):
         "clips_count": len(clips),
         "total_views": sum(clip.view_count for clip in clips),
         "clips": [
-            serialize_clip(clip, timecode)
-            for clip, timecode in zip(clips, timecodes)
+            serialize_clip(clip, timecode) for clip, timecode in zip(clips, timecodes)
         ],
     }
 
