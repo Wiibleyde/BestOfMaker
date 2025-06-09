@@ -217,8 +217,35 @@ def save_bestof_metadata(clips: list[Clip], file_path: str, date_str: str):
         timecodes.append(current_time)
         current_time += getattr(clip, "duration", 0)
 
+    # Générer le titre YouTube avec le clip le plus vu
+    most_viewed_clip = max(clips, key=lambda clip: clip.view_count)
+    # Convertir la date au format DD/MM/YYYY
+    date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+    formatted_date = date_obj.strftime("%d/%m/%Y")
+    youtube_title = f"{most_viewed_clip.title} - BEST OF DU {formatted_date}"
+
+    # Générer la description YouTube avec la liste des clips
+    clips_list = "\n".join(
+        [
+            f"{format_timecode(timecode)} : {clip.broadcaster_name} - {clip.title}"
+            for clip, timecode in zip(clips, timecodes)
+        ]
+    )
+
+    youtube_description = f"""Voici le best of du {formatted_date} j'espère qu'il vous plaira ! 
+Ce best of est généré automatiquement en fonction des clips fait par les streamer du serveur, donc si un moment vous plait et vous pensez qu'il serait bien dans ce best of, il vous suffit de créer le clip et qu'il soit parmis les plus vu de la semaine ! 
+
+Les clips de la semaine :
+{clips_list}
+
+Si quelque chose vous semble bizzare, n'hésitez pas à contacter @Wiibleyde sur les réseaux sociaux (Discord de préférence) ! 
+
+Merci pour votre présence et à la semaine prochaine !"""
+
     metadata = {
         "date": date_str,
+        "youtube_title": youtube_title,
+        "youtube_description": youtube_description,
         "file_path": file_path,
         "clips_count": len(clips),
         "total_views": sum(clip.view_count for clip in clips),

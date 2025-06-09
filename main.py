@@ -38,7 +38,7 @@ def run_bestof_generator():
     print(
         f"\n[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Démarrage de la génération du best-of hebdomadaire..."
     )
-    asyncio.run(generate_weekly_bestof())
+    asyncio.run(generate_weekly_bestof()) # type: ignore
     print(
         f"[{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}] Génération du best-of terminée."
     )
