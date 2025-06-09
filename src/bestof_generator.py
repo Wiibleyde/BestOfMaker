@@ -69,7 +69,7 @@ async def generate_weekly_bestof(
             streamer_clips = await get_clips_with_term(
                 twitch,
                 broadcaster_id=broadcaster_id,
-                term=None,
+                term="",
                 first_count=max_clips_per_streamer,
             )
 

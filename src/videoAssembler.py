@@ -65,8 +65,7 @@ def concatClips(clip_infos: list[tuple[str, str]], output_path: str) -> str:
         try:
             clip = VideoFileClip(path)
             clip = clip.resized(width=1920, height=1080)
-            if clip.fps != 60:
-                clip = clip.with_fps(60)
+            clip = clip.with_fps(60)
             video_clips.append(clip)
         except Exception as e:
             print(f"Erreur lors de l'ouverture du clip {path}: {e}")

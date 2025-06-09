@@ -36,11 +36,13 @@ async def login() -> Twitch:
     return twitch
 
 
+from typing import Optional
+
 async def get_clips_with_term(
     twitch: Twitch,
-    game_id: str = None,
-    term: str = None,
-    broadcaster_id: str = None,
+    game_id: Optional[str] = None,
+    term: Optional[str] = None,
+    broadcaster_id: Optional[str] = None,
     first_count: int = 100,
     max_clips: int = 500,
 ) -> list[Clip]:
@@ -116,7 +118,7 @@ async def get_clips_with_term(
             )
             if not hasattr(clip, "broadcaster_name") or not clip.broadcaster_name:
                 try:
-                    user = await first(twitch.get_users(ids=[clip.broadcaster_id]))
+                    user = await first(twitch.get_users(user_ids=[clip.broadcaster_id]))
                     print(
                         f"AAAAAAAAAAAAAAAAAAAAAA Récupération du nom du broadcaster pour l'ID {clip.broadcaster_id}..."
                     )
@@ -236,7 +238,7 @@ async def get_broadcasters(
 
     try:
         # Obtenir le générateur de streams actuels
-        stream_generator = twitch.get_streams(game_id=game_id, first=first_count)
+        stream_generator = twitch.get_streams(game_id=[game_id], first=first_count)
 
         # Parcourir les streams et filtrer ceux avec un des termes dans le titre
         async for stream in stream_generator:
