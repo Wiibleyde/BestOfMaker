@@ -11,6 +11,7 @@ from src.twitchClips import (
     Clip,
 )
 from src.videoAssembler import concatClips, INTRO_PATH
+from src.youtube_publisher import publish_youtube_video
 from moviepy import VideoFileClip
 
 
@@ -155,7 +156,7 @@ async def generate_weekly_bestof(
             print(f"Best-of hebdomadaire créé avec succès: {final_path}")
 
             # Enregistrer les métadonnées du best-of
-            save_bestof_metadata(best_clips, final_path, date_str)
+            bestof_metadata = save_bestof_metadata(best_clips, final_path, date_str)
         else:
             print("Échec de la création du best-of.")
     else:
@@ -165,6 +166,13 @@ async def generate_weekly_bestof(
     if os.path.exists(temp_dir):
         shutil.rmtree(temp_dir)
         print(f"Dossier temporaire {temp_dir} supprimé.")
+
+    publish_youtube_video(
+        title=bestof_metadata["youtube_title"],
+        description=bestof_metadata["youtube_description"],
+        video_path=bestof_file,
+        thumbnail_path="bestof/thumbnail.png"  # Chemin de la miniature (à adapter si nécessaire)
+    )
 
 
 def load_tracked_streamers() -> list:
@@ -178,7 +186,7 @@ def load_tracked_streamers() -> list:
     return []
 
 
-def save_bestof_metadata(clips: list[Clip], file_path: str, date_str: str):
+def save_bestof_metadata(clips: list[Clip], file_path: str, date_str: str) -> dict:
     """Enregistre les métadonnées du best-of dans un fichier JSON avec timecodes."""
 
     def format_timecode(seconds):
@@ -262,6 +270,8 @@ Merci pour votre présence et à la semaine prochaine !"""
         print(f"Métadonnées du best-of enregistrées dans {metadata_file}")
     except Exception as e:
         print(f"Erreur lors de l'enregistrement des métadonnées: {e}")
+
+    return metadata
 
 
 if __name__ == "__main__":

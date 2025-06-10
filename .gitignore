@@ -199,3 +199,5 @@ data/**
 temp-audio.m4a
 
 .DS_Store
+
+client_secret.json
