@@ -2,7 +2,7 @@ import asyncio
 import json
 import os
 import shutil
-from datetime import datetime
+from datetime import datetime, timedelta
 from src.twitchClips import (
     login,
     get_clips_with_term,
@@ -12,6 +12,7 @@ from src.twitchClips import (
 )
 from src.videoAssembler import concatClips, INTRO_PATH
 from src.youtube_publisher import publish_youtube_video
+from src.miniature_generator import generate_youtube_thumbnail
 from moviepy import VideoFileClip
 
 
@@ -150,7 +151,8 @@ async def generate_weekly_bestof(
         # Trier les chemins par nom de fichier pour respecter l'ordre
         downloaded_paths.sort()
 
-        final_path = concatClips(downloaded_paths, bestof_file)
+        # final_path = concatClips(downloaded_paths, bestof_file)
+        final_path = "bestof/bestof_2025-06-10.mp4"
 
         if final_path:
             print(f"Best-of hebdomadaire créé avec succès: {final_path}")
@@ -167,11 +169,28 @@ async def generate_weekly_bestof(
         shutil.rmtree(temp_dir)
         print(f"Dossier temporaire {temp_dir} supprimé.")
 
+    most_viewed_clip = max(best_clips, key=lambda clip: clip.view_count)
+
+    # Calculer le lundi de la semaine pour la date donnée
+    date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+    monday_of_week = date_obj - timedelta(days=date_obj.weekday())
+    formatted_week_date = monday_of_week.strftime("%d/%m/%Y")
+
+    thunbailformatted_date = datetime.strptime(date_str, "%Y-%m-%d").strftime(
+        "%Y-%m-%d"
+    )  # Convertir la date au format YYYY-MM-DD pour la miniature
+
+    generate_youtube_thumbnail(
+        image_path=most_viewed_clip.thumbnail_url,
+        date_str=formatted_week_date,
+        output_path=f"bestof/bestof_{thunbailformatted_date}.png",
+    )
+
     publish_youtube_video(
         title=bestof_metadata["youtube_title"],
         description=bestof_metadata["youtube_description"],
         video_path=bestof_file,
-        thumbnail_path="bestof/thumbnail.png"  # Chemin de la miniature (à adapter si nécessaire)
+        thumbnail_path=f"bestof/bestof_{thunbailformatted_date}.png",  # Chemin de la miniature (à adapter si nécessaire)
     )
 
 
@@ -227,10 +246,13 @@ def save_bestof_metadata(clips: list[Clip], file_path: str, date_str: str) -> di
 
     # Générer le titre YouTube avec le clip le plus vu
     most_viewed_clip = max(clips, key=lambda clip: clip.view_count)
-    # Convertir la date au format DD/MM/YYYY
+    # Calculer le lundi de la semaine pour la date donnée
     date_obj = datetime.strptime(date_str, "%Y-%m-%d")
-    formatted_date = date_obj.strftime("%d/%m/%Y")
-    youtube_title = f"{most_viewed_clip.title} - BEST OF DU {formatted_date}"
+    monday_of_week = date_obj - timedelta(days=date_obj.weekday())
+    formatted_week_date = monday_of_week.strftime("%d/%m/%Y")
+    youtube_title = (
+        f"{most_viewed_clip.title} - BEST OF DE LA SEMAINE DU {formatted_week_date}"
+    )
 
     # Générer la description YouTube avec la liste des clips
     clips_list = "\n".join(
@@ -240,7 +262,7 @@ def save_bestof_metadata(clips: list[Clip], file_path: str, date_str: str) -> di
         ]
     )
 
-    youtube_description = f"""Voici le best of du {formatted_date} j'espère qu'il vous plaira ! 
+    youtube_description = f"""Voici le best of de la semaine du {formatted_week_date} j'espère qu'il vous plaira ! 
 Ce best of est généré automatiquement en fonction des clips fait par les streamer du serveur, donc si un moment vous plait et vous pensez qu'il serait bien dans ce best of, il vous suffit de créer le clip et qu'il soit parmis les plus vu de la semaine ! 
 
 Les clips de la semaine :
@@ -272,8 +294,3 @@ Merci pour votre présence et à la semaine prochaine !"""
         print(f"Erreur lors de l'enregistrement des métadonnées: {e}")
 
     return metadata
-
-
-if __name__ == "__main__":
-    # Lancer la génération du best-of
-    asyncio.run(generate_weekly_bestof())
