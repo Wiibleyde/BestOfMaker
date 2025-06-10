@@ -227,7 +227,7 @@ def save_bestof_metadata(clips: list[Clip], file_path: str, date_str: str):
     # Générer la description YouTube avec la liste des clips
     clips_list = "\n".join(
         [
-            f"{format_timecode(timecode)} : {clip.broadcaster_name} - {clip.title}"
+            f"{format_timecode(timecode)} {clip.broadcaster_name} - {clip.title}"
             for clip, timecode in zip(clips, timecodes)
         ]
     )
